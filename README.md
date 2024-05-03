@@ -2,6 +2,11 @@
 
 Bot framework web chat with react customization
 
+# Scripts
+
+- Run `npm install` for install the required packages
+- Then run `npm run dev`
+
 # Packages
 
 - botframework-webchat
