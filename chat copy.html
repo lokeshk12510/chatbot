@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <title>Chat Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      For simplicity and code clarity, we are using Babel and React from unpkg.com.
+    -->
+    <script
+      crossorigin="anonymous"
+      src="https://unpkg.com/@babel/standalone@7.8.7/babel.min.js"
+    ></script>
+    <script
+      crossorigin="anonymous"
+      src="https://unpkg.com/react@16.8.6/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin="anonymous"
+      src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.development.js"
+    ></script>
+    <!--
+      This CDN points to the latest official release of Web Chat. If you need to test against Web Chat's latest bits, please refer to using Web Chat's latest bits:
+      https://github.com/microsoft/BotFramework-WebChat#how-to-test-with-web-chats-latest-bits
+    -->
+    <script
+      crossorigin="anonymous"
+      src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"
+    ></script>
+    <style>
+      :root {
+        font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        font-weight: 400;
+
+        color-scheme: light dark;
+        color: rgba(255, 255, 255, 0.87);
+        background-color: #242424;
+
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      a {
+        font-weight: 500;
+        color: #646cff;
+        text-decoration: inherit;
+      }
+      a:hover {
+        color: #535bf2;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      h1 {
+        font-size: 3.2em;
+        line-height: 1.1;
+      }
+
+      button {
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 0.73em 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: inherit;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: border-color 0.25s;
+        color: #242424;
+      }
+      button:hover {
+        border-color: #0f102b;
+      }
+      button:focus,
+      button:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          color: #213547;
+          background-color: #ffffff;
+        }
+        a:hover {
+          color: #747bff;
+        }
+        button {
+          background-color: #f9f9f9;
+        }
+      }
+
+      .bot {
+        width: 1025px;
+      }
+
+      .webchat--css-bfmcc-j7qwjs {
+        border-radius: 10px;
+      }
+
+      .webchat__send-box__main,
+      .webchat__suggested-actions {
+        display: none !important;
+      }
+      .webchat__basic-transcript__scrollable {
+        height: 650px !important;
+      }
+
+      .input {
+        width: 100%;
+        height: 40px;
+        border-radius: 10px;
+        padding-inline: 10px;
+      }
+
+      .inputContainer {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        background-color: coral;
+        gap: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+
+      .container {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .actions {
+        background-color: rgb(204, 204, 159);
+        width: auto;
+        min-width: 250px;
+        border-radius: 10px;
+        padding: 10px;
+        min-height: 200px;
+      }
+
+      .actions p {
+        margin-top: 0;
+        color: #000;
+      }
+
+      .actions button {
+        margin: 5px;
+      }
+
+      #webchat {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root"></div>
+    <script type="text/babel" data-presets="es2015,react,stage-3">
+      // Bot token endpoint url
+      const tokenEndpointUrl =
+        "https://default88af3584c7f642beb743fdb59237f4.b5.environment.api.powerplatform.com/powervirtualagents/botsbyschema/crb31_copilot2/directline/token?api-version=2022-03-01-preview";
+
+      // We are creating our own version of Redux store, which includes middleware and an optional initial state.
+      let store = null;
+      let actions = [];
+
+      let container = document.getElementById("buttonContainer");
+
+      const handleActionDispatch = (text) => {
+        store.dispatch({
+          type: "WEB_CHAT/SEND_MESSAGE", // This action is to send message
+          payload: { text },
+        });
+      };
+
+      const handleInput = () => {
+        let inputField = document.getElementById("input");
+        store.dispatch({
+          type: "WEB_CHAT/SEND_MESSAGE", // This action is to send message
+          payload: { text: inputField.value },
+        });
+        inputField.value = "";
+      };
+
+      const renderActionBtns = () => {
+        console.log(actions, "Actions");
+
+        // Loop through the array and create buttons
+        actions.forEach(function (label) {
+          // Create a button element
+          let button = document.createElement("button");
+
+          // Set the button text to the current array element
+          button.textContent = label.title;
+          button.onclick = () => handleActionDispatch(label.value);
+
+          // Append the button to the container
+          container.appendChild(button);
+        });
+      };
+
+      (async function () {
+        const res = await fetch(tokenEndpointUrl);
+        const { token } = await res.json();
+
+        store = window.WebChat.createStore(
+          {},
+          ({ dispatch }) =>
+            (next) =>
+            (action) => {
+              if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+                // After connected, we will send a message by dispatching a Redux action.
+                dispatch({
+                  type: "WEB_CHAT/SEND_MESSAGE",
+                  payload: { text: "sample:backchannel" },
+                });
+              } else if (action.type === "DIRECT_LINE/INCOMING_ACTIVITY") {
+                // When receiving an activity of type "event" with name of "sample:backchannel", prompt it out.
+                const { activity } = action.payload;
+
+                actions = activity?.suggestedActions?.actions || [];
+                if (actions.length > 0) {
+                  renderActionBtns();
+                } else {
+                  container.innerHTML = "";
+                }
+              }
+
+              return next(action);
+            }
+        );
+
+        const { ReactWebChat } = window.WebChat;
+
+        window.ReactDOM.render(
+          <div class="bot">
+            <h1>CHAT BOT</h1>
+            <div class="inputContainer">
+              <input autofocus class="input" id="input" aria-label="input" />
+              <button onclick="handleInput()">Submit</button>
+            </div>
+            <div class="container" role="main">
+              <div id="webchat">
+                <ReactWebChat
+                  directLine={window.WebChat.createDirectLine({ token })}
+                  store={store}
+                />
+              </div>
+              <div class="actions">
+                <p>Suggested Actions</p>
+                <div id="buttonContainer"></div>
+              </div>
+            </div>
+          </div>,
+          document.getElementById("root")
+        );
+      })().catch((err) => console.error(err));
+    </script>
+  </body>
+</html>
