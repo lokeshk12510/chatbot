@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <title>Chat Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Lato"
+    />
+
+    <!--
+      For simplicity and code clarity, we are using Babel and React from unpkg.com.
+    -->
+    <script
+      crossorigin="anonymous"
+      src="https://unpkg.com/@babel/standalone@7.8.7/babel.min.js"
+    ></script>
+    <!--
+      This CDN points to the latest official release of Web Chat. If you need to test against Web Chat's latest bits, please refer to using Web Chat's latest bits:
+      https://github.com/microsoft/BotFramework-WebChat#how-to-test-with-web-chats-latest-bits
+    -->
+    <script
+      crossorigin="anonymous"
+      src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"
+    ></script>
+    <script
+      crossorigin="anonymous"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+    ></script>
+
+    <script
+      type="text/babel"
+      data-presets="es2015,react,stage-3"
+      src="./script.js"
+    ></script>
+  </head>
+
+  <body>
+    <!-- chatbot -->
+    <button class="chatbox-btn">
+      <i class="fa fa-comment fa-2x" aria-hidden="true"></i>
+    </button>
+    <section class="chatbox-popup">
+      <header class="chatbox-popup__header">
+        <aside style="margin-right: 20px">
+          <i
+            class="fa fa-user-circle fa-3x chatbox-popup__avatar"
+            aria-hidden="true"
+          ></i>
+        </aside>
+        <aside style="flex: 8">
+          <h1>CHATBOT</h1>
+        </aside>
+        <aside style="flex: 1">
+          <button class="chatbox-close">
+            <i class="fa fa-close" aria-hidden="true"></i>
+          </button>
+        </aside>
+      </header>
+      <main class="chatbox-popup__main">
+        <div id="webchat"></div>
+      </main>
+      <footer class="chatbox-popup__footer">
+        <aside style="flex: 10">
+          <textarea
+            type="text"
+            placeholder="Type your message here..."
+            autofocus
+            id="input"
+          ></textarea>
+        </aside>
+        <button
+          style="flex: 1; color: #f36e32; text-align: center"
+          id="submitBtn"
+        >
+          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+        </button>
+      </footer>
+    </section>
+  </body>
+</html>
